@@ -7,27 +7,31 @@ use nom::multi::{many0, many1};
 use nom::number::complete::double;
 use nom::sequence::{delimited, preceded, tuple};
 
-enum ParsedStatement<'a> {
+#[derive(Debug)]
+pub enum ParsedStatement<'a> {
     Declaration(&'a str),
     InputOperation(&'a str),
     OutputOperation(ParsedExpr<'a>),
     Assignment(&'a str, ParsedExpr<'a>),
 }
 
-type ParsedExpr<'a> = (ParsedTerm<'a>, Vec<(ExprOperator, ParsedTerm<'a>)>);
-type ParsedTerm<'a> = (ParsedFactor<'a>, Vec<(TermOperator, ParsedFactor<'a>)>);
+pub type ParsedExpr<'a> = (ParsedTerm<'a>, Vec<(ExprOperator, ParsedTerm<'a>)>);
+pub type ParsedTerm<'a> = (ParsedFactor<'a>, Vec<(TermOperator, ParsedFactor<'a>)>);
 
-enum ParsedFactor<'a> {
+#[derive(Debug, PartialEq)]
+pub enum ParsedFactor<'a> {
     Literal(f64),
     Identifier(&'a str),
     SubExpression(Box<ParsedExpr<'a>>),
 }
 
-enum TermOperator { Multiply, Divide }
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum TermOperator { Multiply, Divide }
 
-enum ExprOperator { Add, Subtract }
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ExprOperator { Add, Subtract }
 
-type ParsedProgram<'a> = Vec<ParsedStatement<'a>>;
+pub type ParsedProgram<'a> = Vec<ParsedStatement<'a>>;
 
 pub fn parse_program(input: &str) -> IResult<&str, ParsedProgram> {
     many0(
