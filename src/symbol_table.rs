@@ -15,7 +15,7 @@ impl SymbolTable {
         let exists = self.entries.iter().find(|entry| &entry.0 == identifier);
         if exists.is_none() {
             self.entries.push((identifier.to_string(), 0.0));
-            Ok(self.entries.len())
+            Ok(self.entries.len() - 1)
         } else {
             Err(format!("Error: Duplicate Identifier '{}'", identifier))
         }
@@ -32,6 +32,10 @@ impl SymbolTable {
             None => Err("".to_string())
         }
 
+    }
+
+    pub fn get_name(&self, handle: usize) -> String {
+        self.entries[handle].0.clone()
     }
 
     pub fn get_value(&self, handle: usize) -> f64 {
