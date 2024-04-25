@@ -1,9 +1,9 @@
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while};
 use nom::character::complete::{alpha1, char};
-use nom::{char, delimited, IResult, tuple};
+use nom::IResult;
 use nom::combinator::map;
-use nom::multi::{many0, many1};
+use nom::multi::many0;
 use nom::number::complete::double;
 use nom::sequence::{delimited, preceded, tuple};
 

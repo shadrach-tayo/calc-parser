@@ -1,7 +1,7 @@
 use crate::parser::{ExprOperator, ParsedExpr, ParsedFactor, ParsedProgram, ParsedStatement, ParsedTerm, TermOperator};
 use crate::symbol_table::SymbolTable;
 
-type AnalyzedProgram = Vec<AnalyzedStatement>;
+pub type AnalyzedProgram = Vec<AnalyzedStatement>;
 
 #[derive(Debug)]
 pub enum AnalyzedStatement {
@@ -11,8 +11,8 @@ pub enum AnalyzedStatement {
     Assignment(usize, AnalyzedExpr),
 }
 
-type AnalyzedExpr = (AnalyzedTerm, Vec<(ExprOperator, AnalyzedTerm)>);
-type AnalyzedTerm = (AnalyzedFactor, Vec<(TermOperator, AnalyzedFactor)>);
+pub type AnalyzedExpr = (AnalyzedTerm, Vec<(ExprOperator, AnalyzedTerm)>);
+pub type AnalyzedTerm = (AnalyzedFactor, Vec<(TermOperator, AnalyzedFactor)>);
 
 #[derive(Debug)]
 pub enum AnalyzedFactor {

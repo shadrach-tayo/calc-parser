@@ -1,3 +1,4 @@
+
 #[derive(Debug)]
 pub struct SymbolTable {
     entries: Vec<(String, f64)>,
@@ -31,5 +32,15 @@ impl SymbolTable {
             None => Err("".to_string())
         }
 
+    }
+
+    pub fn get_value(&self, handle: usize) -> f64 {
+        self.entries[handle].1
+    }
+    pub fn set_value(&mut self, handle: usize, value: f64) {
+       self.entries[handle].1 = value;
+    }
+    pub fn iter(&self) -> std::slice::Iter<'_, (String, f64)> {
+        self.entries.iter()
     }
 }
