@@ -1,17 +1,17 @@
+mod analyzer;
+mod compiler;
+mod executor;
 mod parser;
 mod symbol_table;
-mod analyzer;
-mod executor;
-mod compiler;
 
 fn main() {
     let mut args = std::env::args();
     let current_program_path = args.next().unwrap();
     let source_path = args.next();
-    if source_path.is_none() {
-        run_interpreter();
+    if let Some(source_path) = source_path {
+        process_file(&current_program_path, &source_path);
     } else {
-        process_file(&current_program_path, &source_path.unwrap());
+        run_interpreter();
     }
 }
 
@@ -37,40 +37,42 @@ fn process_file(current_program_path: &str, source_path: &str) {
     }
     let source_code = source_code.unwrap();
 
-    let parsed_program;
     // process file
     // let syntax_tree = ;
-    match parser::parse_program(&source_code) {
+    let parsed_program = match parser::parse_program(&source_code) {
         Ok((rest, syntax_tree)) => {
             let trimmed_rest = rest.trim();
-            if trimmed_rest.len() > 0 {
-                eprintln!("invalid remaining code in '{}': {}", source_path, trimmed_rest);
+            if !trimmed_rest.is_empty() {
+                eprintln!(
+                    "invalid remaining code in '{}': {}",
+                    source_path, trimmed_rest
+                );
                 return;
             }
-            parsed_program = syntax_tree;
+            syntax_tree
         }
         Err(err) => {
             eprintln!("Invalid code in '{}': {:?}", source_path, err);
             return;
         }
-    }
+    };
 
-    let analyzed_program;
     let mut variables = symbol_table::SymbolTable::new();
-    match analyzer::analyze_program(&mut variables, &parsed_program) {
-        Ok(analyzed_tree) => {
-            analyzed_program = analyzed_tree;
-        }
+    let analyzed_program = match analyzer::analyze_program(&mut variables, &parsed_program) {
+        Ok(analyzed_tree) => analyzed_tree,
         Err(err) => {
             eprintln!("Invalid code in '{}': {}", source_path, err);
             return;
         }
-    }
+    };
 
     println!("Symbol table: {:#?}", variables);
     println!("Analyzed program: {:#?}", analyzed_program);
 
-    match std::fs::write(&target_path, compiler::translate_to_rust_program(&variables, &analyzed_program)) {
+    match std::fs::write(
+        &target_path,
+        compiler::translate_to_rust_program(&variables, &analyzed_program),
+    ) {
         Ok(_) => eprintln!("Compiled {} to {}.", source_path, target_path),
         Err(err) => eprintln!("Failed to write to file {}: ({})", target_path, err),
     }
@@ -82,7 +84,7 @@ fn run_interpreter() {
     let mut variables = symbol_table::SymbolTable::new();
     loop {
         let command = input_command();
-        if command.len() == 0 {
+        if command.is_empty() {
             break;
         }
 
@@ -97,9 +99,9 @@ fn run_interpreter() {
                     eprintln!(" {}: {}", var.0, var.1);
                 }
             }
-            trimmed_command => match parser::parse_program(&trimmed_command) {
+            trimmed_command => match parser::parse_program(trimmed_command) {
                 Ok((rest, parsed_program)) => {
-                    if rest.len() > 0 {
+                    if !rest.is_empty() {
                         eprintln!("Unparsed Input: `{}`.", rest);
                         return;
                     } else {
@@ -107,13 +109,12 @@ fn run_interpreter() {
                             Ok(analyzed_program) => {
                                 executor::execute_program(&mut variables, &analyzed_program)
                             }
-                            Err(err) => eprintln!("Error: {:?}", err)
+                            Err(err) => eprintln!("Error: {:?}", err),
                         }
                     }
-
                 }
-                Err(err) => eprintln!("Error: {:?}", err)
-            }
+                Err(err) => eprintln!("Error: {:?}", err),
+            },
         }
     }
 }

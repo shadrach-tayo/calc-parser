@@ -1,5 +1,6 @@
-use std::fmt::format;
-use crate::analyzer::{AnalyzedExpr, AnalyzedFactor, AnalyzedProgram, AnalyzedStatement, AnalyzedTerm};
+use crate::analyzer::{
+    AnalyzedExpr, AnalyzedFactor, AnalyzedProgram, AnalyzedStatement, AnalyzedTerm,
+};
 use crate::parser::{ExprOperator, TermOperator};
 use crate::symbol_table::SymbolTable;
 
@@ -7,8 +8,12 @@ fn translate_to_rust_expr(variables: &SymbolTable, expr: &AnalyzedExpr) -> Strin
     let mut result = translate_to_rust_term(variables, &expr.0);
     for factor in &expr.1 {
         match factor.0 {
-            ExprOperator::Add => result += &format!(" + {}", &translate_to_rust_term(variables, &factor.1)),
-            ExprOperator::Subtract => result += &format!(" - {}", &translate_to_rust_term(variables, &factor.1)),
+            ExprOperator::Add => {
+                result += &format!(" + {}", &translate_to_rust_term(variables, &factor.1))
+            }
+            ExprOperator::Subtract => {
+                result += &format!(" - {}", &translate_to_rust_term(variables, &factor.1))
+            }
         }
     }
     result
@@ -17,26 +22,34 @@ fn translate_to_rust_expr(variables: &SymbolTable, expr: &AnalyzedExpr) -> Strin
 fn translate_to_rust_term(variables: &SymbolTable, term: &AnalyzedTerm) -> String {
     let mut result = translate_to_rust_factor(variables, &term.0);
     for factor in &term.1 {
-       match factor.0 {
-           TermOperator::Multiply => result += &format!(" * {}", &translate_to_rust_factor(variables, &factor.1)),
-           TermOperator::Divide => result += &format!(" / {}", &translate_to_rust_factor(variables, &factor.1)),
-       }
-   }
+        match factor.0 {
+            TermOperator::Multiply => {
+                result += &format!(" * {}", &translate_to_rust_factor(variables, &factor.1))
+            }
+            TermOperator::Divide => {
+                result += &format!(" / {}", &translate_to_rust_factor(variables, &factor.1))
+            }
+        }
+    }
     result
 }
 
 fn translate_to_rust_factor(variables: &SymbolTable, factor: &AnalyzedFactor) -> String {
     match factor {
         AnalyzedFactor::Literal(value) => format!("{}f64", value),
-        AnalyzedFactor::Identifier(handle) => format!("{}", variables.get_name(*handle)),
-        AnalyzedFactor::SubExpression(expr) => format!("({})", &translate_to_rust_expr(variables, expr))
+        AnalyzedFactor::Identifier(handle) => variables.get_name(*handle),
+        AnalyzedFactor::SubExpression(expr) => translate_to_rust_expr(variables, expr),
     }
 }
 
 fn translate_to_rust_statement(variables: &SymbolTable, statement: &AnalyzedStatement) -> String {
     match statement {
-        AnalyzedStatement::InputOperation(handle) => format!("_{} = input();", variables.get_name(*handle)),
-        AnalyzedStatement::Declaration(handle) => format!("let mut _{} = 0.0;", variables.get_name(*handle)),
+        AnalyzedStatement::InputOperation(handle) => {
+            format!("_{} = input();", variables.get_name(*handle))
+        }
+        AnalyzedStatement::Declaration(handle) => {
+            format!("let mut _{} = 0.0;", variables.get_name(*handle))
+        }
         AnalyzedStatement::Assignment(handle, expr) => format!(
             "_{} = {};",
             variables.get_name(*handle),
@@ -68,11 +81,10 @@ pub fn translate_to_rust_program(variables: &SymbolTable, program: &AnalyzedProg
     rust_program += "fn main() {\n";
     for statement in program {
         rust_program += "   ";
-        rust_program += &translate_to_rust_statement(&variables, statement);
+        rust_program += &translate_to_rust_statement(variables, statement);
         rust_program += "\n";
     }
     rust_program += "}\n";
 
     rust_program
 }
-

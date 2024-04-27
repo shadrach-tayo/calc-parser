@@ -14,7 +14,9 @@ fn input() -> f64 {
 fn main() {
    let mut _a = 0.0;
    let mut _b = 0.0;
+   let mut _c = 0.0;
    _a = input();
    _b = input();
-   println!("{}", a + b);
+   _c = 6f64;
+   println!("{}", a + b / b + c);
 }
